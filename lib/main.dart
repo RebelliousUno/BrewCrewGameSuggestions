@@ -12,8 +12,6 @@ import 'package:flutter/material.dart';
 void main() => runApp(GameSuggestions());
 
 class StatefulGameSuggestions extends StatefulWidget {
-
-
   @override
   _GameSuggestionState createState() => _GameSuggestionState();
 }
@@ -104,40 +102,5 @@ class _GameSuggestionState extends State<StatefulGameSuggestions> {
         _searchResult = _source.fetchFilteredGame(text);
       }
     });
-  }
-}
-
-class GameDataSource {
-  List<Game> _list = [];
-
-  GameDataSource() {
-    Map<String, String> minecraft = {
-      "Uno": "Because it's a good game",
-      "Arclight": "I played it and was underwhelmed",
-      "Serafina": "Completely Whelmed"
-    };
-    Map<String, String> magic = {
-      "Uno": "Digital Cardboard",
-      "Arclight": "It's ok I guess",
-      "Jeff": "Help I'm trapped inside a game suggestion form"
-    };
-
-    Map<String, String> hearts = {"Dave": "it's free with your PC"};
-
-    _list.add(new Game("Microsoft Hearts", hearts, false));
-    _list.add(new Game("Minecraft", minecraft, true));
-    _list.add(new Game("Magic: The Gathering", magic, false));
-    _list.sort((a, b) => a.getName().compareTo(b.getName()));
-  }
-
-  List<Game> getFilteredGameList(String name) {
-    return List<Game>.from(_list)
-        .where((element) =>
-            element.getName().toLowerCase().contains(name.toLowerCase()))
-        .toList();
-  }
-
-  List<Game> getGameList() {
-    return List<Game>.from(_list);
   }
 }

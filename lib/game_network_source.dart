@@ -1,54 +1,51 @@
 import 'dart:convert';
 
 import 'package:brewcrew/game.dart';
+import 'package:brewcrew/prod.dart';
 import "package:http/http.dart" as http;
-
 
 class GameNetworkSource {
   List<Game> _list = [];
-  String key = "";
+  String key = Prod.key;
 
-  Future<List<Game>> fetchGameSuggestions() async {
-    if (!_list.isEmpty) {
-      return List.from(_list);
-    }
-    final response = await http.get(Uri.https(
-        'api.rebellious.uno', 'gamesuggestions/GetGameSuggestions',
-        {"key": key}));
+  Future<void> _setupList() async {
+    final response = await http.get(Uri.https('api.rebellious.uno',
+        'gamesuggestions/GetGameSuggestions', {"key": key}));
     if (response.statusCode == 200) {
       _list = _getGameList(jsonDecode(response.body));
-      return List.from(_list);
     } else {
       throw Exception("Failed to get Game Suggestions");
     }
   }
 
+  Future<List<Game>> fetchGameSuggestions() async {
+    if (_list.isEmpty) {
+      await _setupList();
+    }
+    return List.from(_list);
+  }
+
   Future<List<Game>> fetchFilteredGame(String text) async {
-    if (!_list.isEmpty) {
-      return _getFilteredGameList(text);
+    if (_list.isEmpty) {
+      await _setupList();
     }
-    final response = await http.get(Uri.https(
-        'api.rebellious.uno', 'gamesuggestions/GetGameSuggestions',
-        {"key": key}));
-    if (response.statusCode == 200) {
-        _list = _getGameList(jsonDecode(response.body));
-      return _getFilteredGameList(text);
-    } else {
-      throw Exception("Failed to get Game Suggestions");
-    }
+    return _getFilteredGameList(text);
   }
 
   List<Game> getFilteredGameList(String name) {
     return List<Game>.from(_list)
         .where((element) =>
-        element.getName().toLowerCase().contains(name.toLowerCase()))
+            element.getName().toLowerCase().contains(name.toLowerCase()))
         .toList();
   }
 
   List<Game> _getFilteredGameList(String text) {
     List<Game> res = List.from(_list);
     res.sort((a, b) => a.getName().compareTo(b.getName()));
-    return res.where((element) => element.getName().toLowerCase().contains(text.toLowerCase())).toList();
+    return res
+        .where((element) =>
+            element.getName().toLowerCase().contains(text.toLowerCase()))
+        .toList();
   }
 
   List<Game> _getGameList(jsonDecode) {
@@ -60,5 +57,4 @@ class GameNetworkSource {
     res.sort((a, b) => a.getName().compareTo(b.getName()));
     return res;
   }
-
 }
