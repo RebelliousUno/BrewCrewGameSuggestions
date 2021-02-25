@@ -4,12 +4,25 @@
 
 import 'dart:developer';
 
+import 'package:brewcrew/add_game_form.dart';
 import 'package:brewcrew/game.dart';
 import 'package:brewcrew/game_network_source.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(GameSuggestions());
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        title: 'Game Suggestions',
+        home: GameSuggestions()
+    );
+  }
+
+}
+
 
 class StatefulGameSuggestions extends StatefulWidget {
   @override
@@ -17,33 +30,38 @@ class StatefulGameSuggestions extends StatefulWidget {
 }
 
 class GameSuggestions extends StatelessWidget {
-  Widget gameDetails = StatefulGameSuggestions();
+  var gameDetails = StatefulGameSuggestions();
 
   @override
   Widget build(BuildContext context) {
-    Widget body = Container(
+    var body = Container(
       child: gameDetails,
     );
-    return MaterialApp(
-      title: 'Game Suggestions',
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Game Suggestions'),
-        ),
-        body: Center(
-            child: Container(
-          width: 800,
-          child: body,
-        )),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Game Suggestions'),
       ),
+      floatingActionButton: FloatingActionButton(
+        tooltip: 'Add', // used by assistive technologies
+        child: Icon(Icons.add),
+        onPressed: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => AddGameEntryForm()));
+        },
+      ),
+      body: Center(
+          child: Container(
+            width: 800,
+            child: body,
+          )),
     );
   }
 }
 
 class _GameSuggestionState extends State<StatefulGameSuggestions> {
-  GameNetworkSource _source = GameNetworkSource();
+  var _source = GameNetworkSource();
   Future<List<Game>> _searchResult;
-  TextEditingController controller = new TextEditingController();
+  var controller = new TextEditingController();
 
   @override
   void initState() {
@@ -53,7 +71,7 @@ class _GameSuggestionState extends State<StatefulGameSuggestions> {
 
   @override
   Widget build(BuildContext context) {
-    Widget searchBar = Container(
+    var searchBar = Container(
         padding: const EdgeInsets.all(32),
         child: Row(
           children: [
@@ -61,14 +79,15 @@ class _GameSuggestionState extends State<StatefulGameSuggestions> {
                 padding: const EdgeInsets.all(8), child: Icon(Icons.search)),
             Expanded(
                 child: TextField(
-              controller: controller,
-              onChanged: onSearchTextChanged,
-              decoration: InputDecoration(
-                  border: OutlineInputBorder(), hintText: "Search for a game"),
-            ))
+                  controller: controller,
+                  onChanged: onSearchTextChanged,
+                  decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText: "Search for a game"),
+                ))
           ],
         ));
-    Widget futureDetails = FutureBuilder<List<Game>>(
+    var futureDetails = FutureBuilder<List<Game>>(
         future: _searchResult,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
@@ -80,7 +99,7 @@ class _GameSuggestionState extends State<StatefulGameSuggestions> {
                   return snapshot.data[i].getCard();
                 });
           } else if (snapshot.hasError) {
-            return Text("$snapshot.error");
+            return Text("${snapshot.error}");
           }
           return CircularProgressIndicator();
         });

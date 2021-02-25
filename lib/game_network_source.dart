@@ -6,7 +6,7 @@ import "package:http/http.dart" as http;
 
 class GameNetworkSource {
   List<Game> _list = [];
-  String key = Prod.key;
+  var key = Prod.key;
 
   Future<void> _setupList() async {
     final response = await http.get(Uri.https('api.rebellious.uno',
@@ -40,7 +40,7 @@ class GameNetworkSource {
   }
 
   List<Game> _getFilteredGameList(String text) {
-    List<Game> res = List.from(_list);
+    var res = List.from(_list);
     res.sort((a, b) => a.getName().compareTo(b.getName()));
     return res
         .where((element) =>
