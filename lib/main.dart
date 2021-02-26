@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:developer';
-
 import 'package:brewcrew/add_game_form.dart';
 import 'package:brewcrew/game.dart';
 import 'package:brewcrew/game_network_source.dart';
@@ -15,14 +13,9 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        title: 'Game Suggestions',
-        home: GameSuggestions()
-    );
+    return MaterialApp(title: 'Game Suggestions', home: GameSuggestions());
   }
-
 }
-
 
 class StatefulGameSuggestions extends StatefulWidget {
   @override
@@ -34,27 +27,7 @@ class GameSuggestions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var body = Container(
-      child: gameDetails,
-    );
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Game Suggestions'),
-      ),
-      floatingActionButton: FloatingActionButton(
-        tooltip: 'Add', // used by assistive technologies
-        child: Icon(Icons.add),
-        onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => AddGameEntryForm()));
-        },
-      ),
-      body: Center(
-          child: Container(
-            width: 800,
-            child: body,
-          )),
-    );
+    return gameDetails;
   }
 }
 
@@ -79,12 +52,11 @@ class _GameSuggestionState extends State<StatefulGameSuggestions> {
                 padding: const EdgeInsets.all(8), child: Icon(Icons.search)),
             Expanded(
                 child: TextField(
-                  controller: controller,
-                  onChanged: onSearchTextChanged,
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: "Search for a game"),
-                ))
+              controller: controller,
+              onChanged: onSearchTextChanged,
+              decoration: InputDecoration(
+                  border: OutlineInputBorder(), hintText: "Search for a game"),
+            ))
           ],
         ));
     var futureDetails = FutureBuilder<List<Game>>(
@@ -104,13 +76,40 @@ class _GameSuggestionState extends State<StatefulGameSuggestions> {
           return CircularProgressIndicator();
         });
 
-    return Column(
+    var col = Column(
       children: [searchBar, futureDetails],
+    );
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Game Suggestions'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        tooltip: 'Add', // used by assistive technologies
+        child: Icon(Icons.add),
+        onPressed: () {
+          Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => AddGameEntryForm()))
+              .then((value) => refreshSearch());
+        },
+      ),
+      body: Align(
+          alignment: Alignment.topCenter,
+          child: Container(
+            width: 800,
+            child: SingleChildScrollView(child: col),
+          )),
     );
   }
 
   onSearchTextChanged(String text) {
     doSearch(text.trim());
+  }
+
+  void refreshSearch() {
+    setState(() {
+      _searchResult = _source.fetchGameSuggestions(true);
+    });
   }
 
   void doSearch(String text) {

@@ -18,8 +18,8 @@ class GameNetworkSource {
     }
   }
 
-  Future<List<Game>> fetchGameSuggestions() async {
-    if (_list.isEmpty) {
+  Future<List<Game>> fetchGameSuggestions([bool forceRefresh = false]) async {
+    if (_list.isEmpty || forceRefresh) {
       await _setupList();
     }
     return List.from(_list);
@@ -40,7 +40,7 @@ class GameNetworkSource {
   }
 
   List<Game> _getFilteredGameList(String text) {
-    var res = List.from(_list);
+    List<Game> res = List.from(_list);
     res.sort((a, b) => a.getName().compareTo(b.getName()));
     return res
         .where((element) =>
