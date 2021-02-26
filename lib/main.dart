@@ -72,6 +72,7 @@ class _GameSuggestionState extends State<StatefulGameSuggestions> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             return ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
                 itemCount: snapshot.data.length,
