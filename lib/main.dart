@@ -35,17 +35,18 @@ class _GameSuggestionState extends State<StatefulGameSuggestions> {
   var _source = GameNetworkSource();
   Future<List<Game>> _searchResult;
   var controller = new TextEditingController();
+  bool _checkbox = null;
 
   @override
   void initState() {
     super.initState();
-    _searchResult = _source.fetchGameSuggestions();
+    _searchResult = _source.fetchGameSuggestions(_checkbox);
   }
 
   @override
   Widget build(BuildContext context) {
     var searchBar = Container(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
         child: Row(
           children: [
             Container(
@@ -56,7 +57,14 @@ class _GameSuggestionState extends State<StatefulGameSuggestions> {
               onChanged: onSearchTextChanged,
               decoration: InputDecoration(
                   border: OutlineInputBorder(), hintText: "Search for a game"),
-            ))
+            )),
+            Row(children: [Checkbox(
+                value: _checkbox,
+                onChanged: (value) {
+                  setState(() => {_checkbox = value});
+                  doSearch(controller.text);
+                },
+                tristate: true), Text("Played?")])
           ],
         ));
     var futureDetails = FutureBuilder<List<Game>>(
@@ -82,7 +90,7 @@ class _GameSuggestionState extends State<StatefulGameSuggestions> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Game Suggestions'),
+        title: Center(child: Text('Game Suggestions')),
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: 'Add', // used by assistive technologies
@@ -108,16 +116,16 @@ class _GameSuggestionState extends State<StatefulGameSuggestions> {
 
   void refreshSearch() {
     setState(() {
-      _searchResult = _source.fetchGameSuggestions(true);
+      _searchResult = _source.fetchGameSuggestions(_checkbox, true);
     });
   }
 
   void doSearch(String text) {
     setState(() {
       if (text.isEmpty) {
-        _searchResult = _source.fetchGameSuggestions();
+        _searchResult = _source.fetchGameSuggestions(_checkbox);
       } else {
-        _searchResult = _source.fetchFilteredGame(text);
+        _searchResult = _source.fetchFilteredGame(text, _checkbox);
       }
     });
   }

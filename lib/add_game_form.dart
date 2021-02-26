@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:brewcrew/prod.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:http/http.dart" as http;
 
@@ -12,7 +13,7 @@ class AddGameEntryForm extends StatelessWidget {
         title: "Add a new Game Suggestion",
         home: Scaffold(
             appBar: AppBar(
-              title: Text('Add a new Game Suggestion'),
+              title: Center(child: Text('Add a new Game Suggestion')),
             ),
             body: Center(
                 child: Container(width: 800, child: AddGameForm(context)))));
@@ -36,77 +37,79 @@ class AddGameFormState extends State<AddGameForm> {
   var usernameController = TextEditingController();
   var reasonController = TextEditingController();
   var gameController = TextEditingController();
+
+  final _isLoading = ValueNotifier(false);
+
   final BuildContext _mainContext;
 
   AddGameFormState(BuildContext mainContext) : _mainContext = mainContext;
 
+  Widget _createTextFormField(
+      String hintText, TextEditingController controller, EdgeInsets padding) {
+    return Container(
+        padding: padding,
+        child: TextFormField(
+            controller: controller,
+            decoration: InputDecoration(hintText: hintText),
+            validator: (value) {
+              return value.isEmpty ? 'Please enter some text' : null;
+            }));
+  }
+
   @override
   Widget build(BuildContext context) {
-    var person = TextFormField(
-      controller: usernameController,
-      decoration: InputDecoration(hintText: "Username"),
-      validator: (value) {
-        if (value.isEmpty) {
-          return 'Please enter some text';
-        }
-        return null;
-      },
-    );
-    var game = TextFormField(
-      controller: gameController,
-      decoration: InputDecoration(hintText: "Game"),
-      validator: (value) {
-        if (value.isEmpty) {
-          return 'Please enter some text';
-        }
-        return null;
-      },
-    );
+    EdgeInsets textFieldPadding = EdgeInsets.all(8);
+    var person =
+        _createTextFormField("Username", usernameController, textFieldPadding);
+    var game = _createTextFormField("Game", gameController, textFieldPadding);
+    var reason =
+        _createTextFormField("Reason", reasonController, textFieldPadding);
 
-    var reason = TextFormField(
-      decoration: InputDecoration(hintText: "Reason"),
-      controller: reasonController,
-      validator: (value) {
-        if (value.isEmpty) {
-          return 'Please enter some text';
-        }
-        return null;
-      },
-    );
-
-    var submitButton = ElevatedButton(
-      onPressed: () async {
-        // Validate returns true if the form is valid, otherwise false.
-        if (_formKey.currentState.validate()) {
-          var response = await _req.addGameSuggestion(usernameController.text,
-              gameController.text, reasonController.text);
-          showDialog(
-              context: context,
-              builder: (BuildContext alertContext) {
-                return AlertDialog(
-                  title: Text("Alert Title"),
-                  content: Text(response),
-                  actions: [
-                    TextButton(
-                        child: Text("OK"),
-                        onPressed: () {
-                          Navigator.of(alertContext).pop();
-                          Navigator.of(_mainContext).pop();
-                        }),
-                  ],
-                );
+    var submitButton = Container(
+        padding: textFieldPadding,
+        child: ElevatedButton(
+          onPressed: () async {
+            // Validate returns true if the form is valid, otherwise false.
+            if (_formKey.currentState.validate()) {
+              setState(() {
+                _isLoading.value = true;
               });
-        }
-      },
-      child: Text('Submit'),
-    );
+              var response = await _req.addGameSuggestion(
+                  usernameController.text,
+                  gameController.text,
+                  reasonController.text);
+              showDialog(
+                  context: context,
+                  builder: (BuildContext alertContext) {
+                    return AlertDialog(
+                      title: Text("Alert Title"),
+                      content: Text(response),
+                      actions: [
+                        TextButton(
+                            child: Text("OK"),
+                            onPressed: () {
+                              Navigator.of(alertContext).pop();
+                              Navigator.of(_mainContext).pop();
+                            }),
+                      ],
+                    );
+                  });
+            }
+          },
+          child: Text('Submit'),
+        ));
 
     return Form(
-      key: _formKey,
-      child: Column(
-        children: [person, game, reason, submitButton],
-      ),
-    );
+        key: _formKey,
+        child: ValueListenableBuilder(
+            valueListenable: _isLoading,
+            builder: (context, value, widget) {
+              return !value
+                  ? Column(
+                      children: [person, game, reason, submitButton],
+                    )
+                  : Center(child: CircularProgressIndicator());
+            }));
   }
 }
 

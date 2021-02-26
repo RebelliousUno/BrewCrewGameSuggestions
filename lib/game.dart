@@ -20,6 +20,10 @@ class Game {
     return _gameName;
   }
 
+  bool getPlayed() {
+    return _played;
+  }
+
   Widget getCard() {
     List<Widget> widgets = [_gameNameRow()];
     widgets.add(Table(

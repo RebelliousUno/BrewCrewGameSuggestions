@@ -18,18 +18,18 @@ class GameNetworkSource {
     }
   }
 
-  Future<List<Game>> fetchGameSuggestions([bool forceRefresh = false]) async {
+  Future<List<Game>> fetchGameSuggestions(bool played, [bool forceRefresh = false]) async {
     if (_list.isEmpty || forceRefresh) {
       await _setupList();
     }
-    return List.from(_list);
+    return List<Game>.from(_list).where((element) => played != null ? element.getPlayed() == played : true).toList();
   }
 
-  Future<List<Game>> fetchFilteredGame(String text) async {
+  Future<List<Game>> fetchFilteredGame(String text, bool played) async {
     if (_list.isEmpty) {
       await _setupList();
     }
-    return _getFilteredGameList(text);
+    return _getFilteredGameList(text, played);
   }
 
   List<Game> getFilteredGameList(String name) {
@@ -39,12 +39,14 @@ class GameNetworkSource {
         .toList();
   }
 
-  List<Game> _getFilteredGameList(String text) {
+  List<Game> _getFilteredGameList(String text, bool played) {
     List<Game> res = List.from(_list);
     res.sort((a, b) => a.getName().compareTo(b.getName()));
     return res
         .where((element) =>
             element.getName().toLowerCase().contains(text.toLowerCase()))
+        .where((element) =>
+            (played != null) ? element.getPlayed() == played : true)
         .toList();
   }
 
