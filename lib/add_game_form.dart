@@ -9,14 +9,12 @@ import "package:http/http.dart" as http;
 class AddGameEntryForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        title: "Add a new Game Suggestion",
-        home: Scaffold(
+    return Scaffold(
             appBar: AppBar(
               title: Center(child: Text('Add a new Game Suggestion')),
             ),
             body: Center(
-                child: Container(width: 800, child: AddGameForm(context)))));
+                child: Container(width: 800, child: AddGameForm(context))));
   }
 }
 
